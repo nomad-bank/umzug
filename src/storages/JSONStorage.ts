@@ -1,5 +1,6 @@
 import jetpack = require('fs-jetpack');
 import { UmzugStorage } from './type-helpers/umzug-storage';
+import { MigrationProperties } from "../migration";
 
 export interface JSONStorageConstructorOptions {
 	/**
@@ -17,14 +18,16 @@ export class JSONStorage implements UmzugStorage {
 		this.path = options?.path ?? jetpack.path(process.cwd(), 'umzug.json');
 	}
 
-	async logMigration(migrationName: string): Promise<void> {
+	async logMigration(migrationProperties: MigrationProperties): Promise<void> {
+		const migrationName = migrationProperties.file;
 		const loggedMigrations = await this.executed();
 		loggedMigrations.push(migrationName);
 
 		await jetpack.writeAsync(this.path, JSON.stringify(loggedMigrations, null, 2));
 	}
 
-	async unlogMigration(migrationName: string): Promise<void> {
+	async unlogMigration(migrationProperties: MigrationProperties): Promise<void> {
+		const migrationName = migrationProperties.file;
 		const loggedMigrations = await this.executed();
 		const updatedMigrations = loggedMigrations.filter(name => name !== migrationName);
 

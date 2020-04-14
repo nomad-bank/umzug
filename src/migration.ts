@@ -1,5 +1,7 @@
 import _path = require('path');
 import { MigrationDefinition, ShortMigrationOptions } from './types';
+import fs = require('fs');
+import md5 = require('md5');
 
 // TODO remove this, use `ShortMigrationOptions` directly in place of `MigrationConstructorOptions`
 export interface MigrationConstructorOptions {
@@ -10,6 +12,8 @@ function isPromise(arg?: any): arg is Promise<any> {
 	// eslint-disable-next-line promise/prefer-await-to-then
 	return arg && typeof arg.then === 'function';
 }
+
+export type MigrationProperties = Readonly<Pick<Migration, 'file' | 'path' | 'checksum'>>
 
 export class Migration {
 	public readonly file: string;
@@ -75,6 +79,13 @@ export class Migration {
 	*/
 	testFileName(string: string): boolean {
 		return this.file.startsWith(this.options.migrations.nameFormatter(string));
+	}
+
+	/**
+ 	Get migration file checksum
+	 */
+	get checksum(): string {
+		return md5(fs.readFileSync(this.path));
 	}
 
 	/**

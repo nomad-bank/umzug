@@ -1,13 +1,15 @@
+import { MigrationProperties } from "../../migration";
+
 export interface UmzugStorage {
 	/**
 	Logs migration to be considered as executed.
 	*/
-	logMigration(migrationName: string): Promise<void>;
+	logMigration(migrationProperties: MigrationProperties): Promise<void>;
 
 	/**
 	Unlogs migration (makes it to be considered as pending).
 	*/
-	unlogMigration(migrationName: string): Promise<void>;
+	unlogMigration(migrationProperties: MigrationProperties): Promise<void>;
 
 	/**
 	Gets list of executed migrations.

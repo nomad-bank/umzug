@@ -1,4 +1,5 @@
 import { UmzugStorage } from './type-helpers/umzug-storage';
+import { MigrationProperties } from "../migration";
 
 type AnyObject = { [key: string]: any };
 
@@ -49,11 +50,13 @@ export class MongoDBStorage implements UmzugStorage {
 		this.collectionName = (options as any).collectionName ?? 'migrations'; // TODO remove this
 	}
 
-	async logMigration(migrationName: string): Promise<void> {
+	async logMigration(migrationProperties: MigrationProperties): Promise<void> {
+		const migrationName = migrationProperties.file;
 		await this.collection.insertOne({ migrationName });
 	}
 
-	async unlogMigration(migrationName: string): Promise<void> {
+	async unlogMigration(migrationProperties: MigrationProperties): Promise<void> {
+		const migrationName = migrationProperties.file;
 		await this.collection.removeOne({ migrationName });
 	}
 

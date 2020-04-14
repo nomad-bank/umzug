@@ -11,10 +11,20 @@ import { MongoDBStorage } from './storages/MongoDBStorage';
 import { SequelizeStorage } from './storages/SequelizeStorage';
 
 import { UmzugStorage, isUmzugStorage } from './storages/type-helpers/umzug-storage';
-import { UmzugExecuteOptions, UmzugConstructorOptions, UmzugEventNames, UmzugRunOptions } from './types';
+import {
+	UmzugExecuteOptions,
+	UmzugConstructorOptions,
+	UmzugEventNames,
+	UmzugRunOptions,
+	MigrationCheck
+} from './types';
+import { ChecksumStorage } from "./storages/ChecksumStorage";
+import { MigrationValidationManager } from "./validation/MigrationValidationManager";
 
 export class Umzug extends EventEmitter {
+	private readonly migrationValidationManager: MigrationValidationManager;
 	public readonly options: Required<UmzugConstructorOptions>;
+
 	public storage: UmzugStorage;
 
 	// #region Constructor
@@ -48,7 +58,15 @@ export class Umzug extends EventEmitter {
 			migrations
 		};
 
-		this.storage = Umzug.resolveStorageOption(this.options.storage, this.options.storageOptions);
+		this.migrationValidationManager = new MigrationValidationManager();
+
+		this.storage = Umzug.resolveStorageOption(
+			this.options.storage,
+			{
+				migrationValidationManager: this.migrationValidationManager,
+				...this.options.storageOptions
+			}
+		);
 	}
 
 	/**
@@ -79,6 +97,10 @@ export class Umzug extends EventEmitter {
 
 		if (storage === 'sequelize') {
 			return new SequelizeStorage(storageOptions);
+		}
+
+		if (storage === 'checksum') {
+			return new ChecksumStorage(storageOptions);
 		}
 
 		let StorageClass;
@@ -143,7 +165,8 @@ export class Umzug extends EventEmitter {
 			const name = path.basename(migration.file, path.extname(migration.file));
 			let startTime;
 
-			const executed = await this._checkExecuted(migration);
+			const { executed, checks } = await this._beforeExecute(migration);
+			if (checks && checks.length > 0) this.log(`Pass all checks: ${checks}`);
 
 			if (!executed || method === 'down') {
 				let { params } = this.options.migrations;
@@ -169,9 +192,9 @@ export class Umzug extends EventEmitter {
 			}
 
 			if (!executed && (method === 'up')) {
-				await this.storage.logMigration(migration.file);
+				await this.storage.logMigration(migration);
 			} else if (method === 'down') {
-				await this.storage.unlogMigration(migration.file);
+				await this.storage.unlogMigration(migration);
 			}
 
 			// TODO uncomment this
@@ -466,6 +489,23 @@ export class Umzug extends EventEmitter {
 		}
 	}
 
+	private async _beforeExecute(migration: Migration): Promise<MigrationCheck> {
+		const executed = await this._checkExecuted(migration);
+		const migrationValidationResults = await this.migrationValidationManager.validateBeforeExecute(migration);
+
+		if(migrationValidationResults.every(v => v.isValid)) {
+			return {
+				executed: executed,
+				checks: migrationValidationResults.map(v => v.name)
+			}
+		} else {
+			const failedValidationMessage = migrationValidationResults
+				.filter(v => !v.isValid)
+				.map(v => v.validationError);
+			throw new Error(`Migration validation failure. Errors: ${failedValidationMessage}`);
+		}
+	}
+
 	/**
 	Skip migrations in a given migration list after `to` migration.
 	*/
@@ -491,4 +531,5 @@ export class Umzug extends EventEmitter {
 
 		return result;
 	}
+
 }

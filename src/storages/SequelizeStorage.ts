@@ -1,6 +1,7 @@
 import { UmzugStorage } from './type-helpers/umzug-storage';
 import { SequelizeType, ModelClassType } from './type-helpers/sequelize-type-helpers';
 import { SetRequired } from 'type-fest';
+import { MigrationProperties } from "../migration";
 
 interface _SequelizeStorageConstructorOptions {
 	/**
@@ -118,14 +119,16 @@ export class SequelizeStorage implements UmzugStorage {
 		) as ModelClassType;
 	}
 
-	async logMigration(migrationName: string): Promise<void> {
+	async logMigration(migrationProperties: MigrationProperties): Promise<void> {
+		const migrationName = migrationProperties.file;
 		await this.model.sync();
 		await this.model.create({
 			[this.columnName]: migrationName
 		});
 	}
 
-	async unlogMigration(migrationName: string): Promise<void> {
+	async unlogMigration(migrationProperties: MigrationProperties): Promise<void> {
+		const migrationName = migrationProperties.file;
 		await this.model.sync();
 		await this.model.destroy({
 			where: {

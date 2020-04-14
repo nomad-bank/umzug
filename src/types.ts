@@ -18,6 +18,18 @@ export interface MigrationDefinition {
 	down(): Promise<any>;
 }
 
+export interface MigrationCheck {
+	/**
+	 Carries information for if the given migration was executed.
+	 */
+	readonly executed: boolean;
+
+	/**
+	 All checks names that were made
+	 */
+	readonly checks: Array<string>
+}
+
 export interface ShortMigrationOptions {
 	/**
 	A function that transforms the migrations function (`up` and/or `down`) before it is executed. It receives the migration function and must return another function that works as a migration function in place of it.
