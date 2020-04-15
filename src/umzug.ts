@@ -237,6 +237,13 @@ export class Umzug extends EventEmitter {
 	}
 
 	/**
+	 Lists all migrations.
+	 */
+	async all(): Promise<Migration[]> {
+		return await this._findMigrations();
+	}
+
+	/**
 	Executes the next pending migration.
 	*/
 	async up(): Promise<Migration[]>;
@@ -260,7 +267,7 @@ export class Umzug extends EventEmitter {
 	async up(options: { from?: string; to?: string }): Promise<Migration[]>;
 
 	async up(options?: UmzugRunOptions): Promise<Migration[]> {
-		return this._run('up', options, this.pending.bind(this));
+		return this._run('up', options, this.all.bind(this));
 	}
 
 	/**
