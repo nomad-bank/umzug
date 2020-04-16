@@ -44,7 +44,7 @@ export class Umzug extends EventEmitter {
 			migrations = {
 				params: [],
 				path: path.resolve(process.cwd(), 'migrations'),
-				pattern: /^\d+[\w-]+\.js$/,
+				pattern: /^\d+[\w-]+\.ts$/,
 				traverseDirectories: false,
 				wrap: (fn: () => Promise<any>) => fn,
 				...options.migrations

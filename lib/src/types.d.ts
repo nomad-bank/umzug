@@ -93,17 +93,18 @@ export interface UmzugConstructorMigrationOptionsA extends ShortMigrationOptions
 export interface UmzugConstructorMigrationOptionsB extends Array<Migration>, UmzugMigrationParameters {
 }
 export declare type UmzugConstructorMigrationOptions = UmzugConstructorMigrationOptionsA | UmzugConstructorMigrationOptionsB;
+export declare type UmzugStorageName = 'none' | 'json' | 'mongodb' | 'sequelize' | 'checksum';
 export interface UmzugConstructorOptions {
     /**
     The storage.
 
-    Possible values for built-in storages: 'none', 'json', 'mongodb', 'sequelize'.
+    Possible values for built-in storages: 'none', 'json', 'mongodb', 'sequelize', 'checksum'.
 
     You can also provide your own custom storage object. It must adhere to the UmzugStorage interface.
 
     You can also provide a string which will be used as an argument for `require()`, which should require a class which implements the UmzugStorage interface.
     */
-    readonly storage?: string | UmzugStorage;
+    readonly storage?: UmzugStorageName | UmzugStorage;
     /**
     The logging function.
 
