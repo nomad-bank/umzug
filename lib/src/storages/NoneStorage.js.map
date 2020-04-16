@@ -1,0 +1,1 @@
+{"version":3,"file":"NoneStorage.js","sourceRoot":"","sources":["../../../src/storages/NoneStorage.ts"],"names":[],"mappings":";;AAGA,MAAa,WAAW;IACvB,gEAAgE;IAChE,KAAK,CAAC,YAAY,CAAC,oBAAyC,IAAkB,CAAC;IAE/E,gEAAgE;IAChE,KAAK,CAAC,cAAc,CAAC,oBAAyC,IAAkB,CAAC;IAEjF,KAAK,CAAC,QAAQ;QACb,OAAO,EAAE,CAAC;IACX,CAAC;CACD;AAVD,kCAUC"}
